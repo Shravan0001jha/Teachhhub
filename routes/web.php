@@ -12,6 +12,7 @@ use App\Http\Controllers\BatchController;
 use App\Http\Controllers\StudyMaterialController;
 use App\Http\Controllers\ZoomController;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\QuizController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -81,6 +82,12 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
         Route::resource('studyMaterial',StudyMaterialController::class);
         Route::resource('meeting',MeetingController::class);
 
+        Route::get('quizzes', [QuizController::class, 'teacherIndex'])->name('quiz.index');
+        Route::get('quiz/create', [QuizController::class, 'create'])->name('quiz.create');
+        Route::post('quiz', [QuizController::class, 'store'])->name('quiz.store');
+        Route::get('quiz/{id}/edit', [QuizController::class, 'edit'])->name('quiz.edit');
+        Route::put('quiz/{quiz}', [QuizController::class, 'update'])->name('quiz.update');
+        Route::delete('quiz/{quiz}', [QuizController::class, 'destroy'])->name('quiz.destroy');
     });
 });
 
@@ -97,6 +104,11 @@ Route::prefix('student')->name('student.')->group(function () {
         Route::get('/get-meeting',[MeetingController::class, 'studentGetMeeting'])->name('get-meeting');
         Route::get('/show-meeting/{meeting}',[MeetingController::class, 'studentShowMeeting'])->name('show-meeting');
         // Add other routes that require student authentication here
+
+        Route::get('quizzes', [QuizController::class, 'studentIndex'])->name('quiz.index');
+        Route::get('quiz/{quiz}', [QuizController::class, 'show'])->name('quiz.show');
+        Route::post('quiz/{quiz}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
+        Route::get('quiz/{quiz}/results', [QuizController::class, 'results'])->name('quiz.results');
     });
 });
 
