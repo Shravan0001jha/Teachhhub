@@ -52,17 +52,34 @@ class ZoomService
     }
 
     // Refresh the access token (if needed)
-    public function refreshAccessToken($refreshToken)
+    public function refreshAccessTokenWithAccountId($accountId)
     {
-        $response = $this->client->post('https://zoom.us/oauth/token', [
-            'form_params' => [
-                'grant_type' => 'refresh_token',
-                'refresh_token' => $refreshToken,
-            ],
-            'auth' => [$this->zoomClientId, $this->zoomClientSecret],
-        ]);
-
-        return json_decode($response->getBody()->getContents(), true);
+        try {
+            // Make a POST request to Zoom's OAuth token endpoint
+            // $response = $this->client->post('https://zoom.us/oauth/token', [
+            //     'headers' => [
+            //         'Authorization' => 'Basic ' . base64_encode($this->zoomClientId . ':' . $this->zoomClientSecret),
+            //         'Content-Type' => 'application/x-www-form-urlencoded',
+            //     ],
+            //     'form_params' => [
+            //         'grant_type' => 'account_credentials',
+            //         'account_id' => $accountId, // Include the account_id here
+            //     ],
+            // ]);
+            $response = Http::asForm()
+                ->withBasicAuth($this->zoomClientId , $this->zoomClientSecret)
+                ->post('https://zoom.us/oauth/token', [
+                    'grant_type' => 'account_credentials',
+                    'account_id' => 'UH-55KnrQt6Wb1Ke9e3bYQ',
+                ]);
+    
+            // Decode and return the response
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Error refreshing Zoom access token with account ID: ' . $e->getMessage());
+            throw $e; // Re-throw the exception to handle it in the controller
+        }
     }
 
     // Function to create a meeting using the access token

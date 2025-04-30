@@ -42,7 +42,7 @@ class ZoomController extends Controller
             // Session::put('zoom_access_token', $tokenResponse['access_token']);
             // Session::put('zoom_refresh_token', $tokenResponse['refresh_token']);
             // Session::put('zoom_token_expires_in', now()->addSeconds($tokenResponse['expires_in']));
-
+            $tokenResponse['refresh_token'] =  $tokenResponse['access_token'];
             $zoomToken = ZoomToken::create($tokenResponse);
             dd($zoomToken);
             return redirect('/dashboard')->with('success', 'Zoom authorization successful!');
@@ -83,21 +83,22 @@ class ZoomController extends Controller
         }
     }
 
-    public function refreshAccessToken(){
-        // dd($this->zoomToken->refresh_token);
+    public function refreshAccessToken()
+    {
         try {
-            // dd($this->zoomService->refreshAccessToken($this->zoomToken->refresh_token));
-            $response = $this->zoomService->refreshAccessToken($this->zoomToken->refresh_token);
+            $accountId = 'your_account_id'; // Replace with the actual account ID
+            $response = $this->zoomService->refreshAccessTokenWithAccountId($accountId);
+    
             if (isset($response['access_token'])) {
+                // Save the new token in the database
                 $zoomToken = ZoomToken::create($response);
-                // Return back with a success message
+    
                 return back()->with('success', 'Zoom access token refreshed successfully.');
             }
+    
             return back()->with('error', 'Failed to refresh the Zoom access token. No token received.');
-
         } catch (\Exception $e) {
-            // dd($e);
-             // Return back with an error message
+            \Log::error('Error refreshing Zoom access token: ' . $e->getMessage());
             return back()->with('error', 'An error occurred while refreshing the Zoom access token.');
         }
     }
