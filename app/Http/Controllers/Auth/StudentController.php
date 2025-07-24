@@ -33,20 +33,20 @@ class StudentController extends Controller
 
     public function showRegisterForm()
     {
-        abort(404);
+        // abort(404);
         return view('auth.student.register');
     }
 
     public function register(Request $request)
     {
-        abort(404);
+        // abort(404);
         $this->validator($request->all())->validate();
 
         $Student = $this->create($request->all());
 
         $Student->assignRole('student');
 
-        Auth::guard('Student')->login($student);
+        // Auth::guard('Student')->login($student);
 
         return redirect('/student');
     }
@@ -62,11 +62,13 @@ class StudentController extends Controller
 
     protected function create(array $data)
     {
-        abort(404);
+        // abort(404);
         return Student::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'created_at' => now(),
+            'created_by' => '7',
         ]);
     }
 

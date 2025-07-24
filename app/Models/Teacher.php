@@ -13,7 +13,7 @@ class Teacher extends Authenticatable
     protected $guard_name = 'teacher';
 
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'created_by', 'created_at'
     ];
 
     protected $hidden = [
@@ -23,6 +23,7 @@ class Teacher extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
     public function batches()
     {
         return $this->hasMany(TeacherBatch::class);

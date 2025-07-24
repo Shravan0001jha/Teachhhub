@@ -33,20 +33,21 @@ class TeacherController extends Controller
 
     public function showRegisterForm()
     {
-        abort(404);
+        // abort(404);
+        // console.log("Teacher Register view called");
         return view('auth.teacher.register');
     }
 
     public function register(Request $request)
     {
-        abort(404);
+        // abort(404);
         $this->validator($request->all())->validate();
 
         $Teacher = $this->create($request->all());
 
         $Teacher->assignRole('teacher');
 
-        Auth::guard('Teacher')->login($teacher);
+        // Auth::guard('Teacher')->login($teacher);
 
         return redirect('/teacher');
     }
@@ -57,16 +58,19 @@ class TeacherController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:teachers'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'created_by' => '7'
         ]);
     }
 
     protected function create(array $data)
     {
-        abort(404);
+        // abort(404);
         return Teacher::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'created_at' => now(),
+            'created_by' => '7'
         ]);
     }
 
