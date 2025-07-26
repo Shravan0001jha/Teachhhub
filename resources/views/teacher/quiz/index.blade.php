@@ -66,16 +66,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- 
-                        TODO: Replace with dynamic data
-                        Expected controller data:
-                        $quizResults = QuizResult::where('teacher_id', auth()->user()->id)
+                       
+                        <!-- $quizResults = QuizResult::where('teacher_id', auth()->user()->id)
                             ->with(['quiz', 'student'])
                             ->orderBy('date', 'desc')
-                            ->get();
+                            ->get(); -->
                         
-                        Loop would be:
-                        @foreach($quizResults as $result)
+                        <!-- Loop would be: -->
+                         @foreach($quizResults as $result)
                             <tr>
                                 <td>{{ $result->quiz->title }}</td>
                                 <td>{{ $result->student->name }}</td>
@@ -92,10 +90,10 @@
                                     </button>
                                 </td>
                             </tr>
-                        @endforeach
-                        -->
+                        @endforeach 
+                       
                         
-                        <!-- Hardcoded sample data for demonstration -->
+                       
                         <tr>
                             <td>Mathematics Quiz 1</td>
                             <td>John Doe</td>
@@ -126,66 +124,8 @@
                                 </button>
                             </td>
                         </tr>
-                        <tr>
-                            <td>Science Quiz 1</td>
-                            <td>Jane Smith</td>
-                            <td>9/10</td>
-                            <td>2024-07-24 10:15:00</td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-info view-submission-btn" 
-                                        data-quiz-title="Science Quiz 1" 
-                                        data-student-name="Jane Smith"
-                                        data-score="9/10"
-                                        data-submission='[
-                                            {
-                                                "question": "What is the chemical symbol for water?",
-                                                "options": ["H2O", "CO2", "NaCl", "O2"],
-                                                "student_answer": "H2O",
-                                                "correct_answer": "H2O",
-                                                "is_correct": true
-                                            },
-                                            {
-                                                "question": "How many planets are in our solar system?",
-                                                "options": ["7", "8", "9", "10"],
-                                                "student_answer": "8",
-                                                "correct_answer": "8",
-                                                "is_correct": true
-                                            }
-                                        ]'>
-                                    View Test
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Mathematics Quiz 1</td>
-                            <td>Bob Wilson</td>
-                            <td>6/10</td>
-                            <td>2024-07-23 16:45:00</td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-info view-submission-btn" 
-                                        data-quiz-title="Mathematics Quiz 1" 
-                                        data-student-name="Bob Wilson"
-                                        data-score="6/10"
-                                        data-submission='[
-                                            {
-                                                "question": "What is 2 + 2?",
-                                                "options": ["2", "3", "4", "5"],
-                                                "student_answer": "4",
-                                                "correct_answer": "4",
-                                                "is_correct": true
-                                            },
-                                            {
-                                                "question": "What is 5 × 6?",
-                                                "options": ["25", "30", "35", "40"],
-                                                "student_answer": "25",
-                                                "correct_answer": "30",
-                                                "is_correct": false
-                                            }
-                                        ]'>
-                                    View Test
-                                </button>
-                            </td>
-                        </tr>
+                        
+                    
                     </tbody>
                 </table>
             </div>
@@ -363,97 +303,88 @@
                 var quizTitle = $(this).data('quiz-title');
                 var studentName = $(this).data('student-name');
                 var score = $(this).data('score');
-                var submissionData = $(this).data('submission');
-                
-                /*
-                TODO: Replace hardcoded data with AJAX call
-                For dynamic implementation, use:
-                
                 var quizId = $(this).data('quiz-id');
                 var studentId = $(this).data('student-id');
-                
+
+                // Show the modal immediately with a loading spinner
+                $('#modal-quiz-title').text(quizTitle);
+                $('#modal-student-name').text(studentName);
+                $('#modal-score').text(score);
+                $('#questions-container').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-3">Loading submission details...</p></div>');
+                $('#viewSubmissionModal').modal('show');
+
+                // Fetch submission data via AJAX
                 $.ajax({
                     url: '/teacher/quiz/' + quizId + '/submission/' + studentId,
                     method: 'GET',
                     success: function(response) {
                         var submissionData = response.submission_details;
-                        // Then use the same modal population logic below
+
+                        // Clear the loading spinner and populate questions
+                        $('#questions-container').empty();
+                        submissionData.forEach(function(item, index) {
+                            var questionHtml = `
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <h6 class="mb-0 text-black">Question ${index + 1}: ${item.question}</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6 class="text-black">Options:</h6>
+                                                <ul class="list-group list-group-flush">`;
+
+                            item.options.forEach(function(option) {
+                                var isCorrect = option === item.correct_answer;
+                                var isSelected = option === item.student_answer;
+                                var badgeClass = '';
+                                var iconClass = '';
+
+                                if (isCorrect && isSelected) {
+                                    badgeClass = 'bg-success';
+                                    iconClass = 'fa fa-check';
+                                } else if (isCorrect) {
+                                    badgeClass = 'bg-success';
+                                    iconClass = 'fa fa-check';
+                                } else if (isSelected) {
+                                    badgeClass = 'bg-danger';
+                                    iconClass = 'fa fa-times';
+                                } else {
+                                    badgeClass = 'bg-light text-dark';
+                                }
+
+                                questionHtml += `
+                                    <li class="list-group-item d-flex justify-content-between align-items-center ${isSelected ? 'border-primary' : ''}">
+                                        ${option}
+                                        ${(isCorrect || isSelected) ? `<span class="badge ${badgeClass}"><i class="${iconClass}"></i></span>` : ''}
+                                    </li>`;
+                            });
+
+                            questionHtml += `
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="text-white">Student's Answer:</h6>
+                                                <p class="text-white">${item.student_answer}</p>
+                                                <h6 class="text-white">Correct Answer:</h6>
+                                                <p class="text-white">${item.correct_answer}</p>
+                                                <h6 class="text-white">Result:</h6>
+                                                <span class="badge ${item.is_correct ? 'bg-success' : 'bg-danger'}">
+                                                    ${item.is_correct ? 'Correct' : 'Incorrect'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`;
+
+                            $('#questions-container').append(questionHtml);
+                        });
                     },
-                    error: function() {
-                        alert('Error loading submission details');
+                    error: function(xhr, status, error) {
+                        console.error('Error loading submission details:', error, xhr.responseText);
+                        $('#questions-container').html('<p class="text-danger">Failed to load submission details. Please try again later.</p>');
                     }
                 });
-                */
-                
-                // Populate modal header info
-                $('#modal-quiz-title').text(quizTitle);
-                $('#modal-student-name').text(studentName);
-                $('#modal-score').text(score);
-                
-                // Clear previous questions
-                $('#questions-container').empty();
-                
-                // Populate questions
-                submissionData.forEach(function(item, index) {
-                    var questionHtml = `
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0 text-white">Question ${index + 1}: ${item.question}</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h6 class="text-white">Options:</h6>
-                                        <ul class="list-group list-group-flush">`;
-                                        
-                    item.options.forEach(function(option, optionIndex) {
-                        var isCorrect = option === item.correct_answer;
-                        var isSelected = option === item.student_answer;
-                        var badgeClass = '';
-                        var iconClass = '';
-                        
-                        if (isCorrect && isSelected) {
-                            badgeClass = 'bg-success';
-                            iconClass = 'fa fa-check';
-                        } else if (isCorrect) {
-                            badgeClass = 'bg-success';
-                            iconClass = 'fa fa-check';
-                        } else if (isSelected) {
-                            badgeClass = 'bg-danger';
-                            iconClass = 'fa fa-times';
-                        } else {
-                            badgeClass = 'bg-light text-dark';
-                        }
-                        
-                        questionHtml += `
-                            <li class="list-group-item d-flex justify-content-between align-items-center ${isSelected ? 'border-primary' : ''}">
-                                ${option}
-                                ${(isCorrect || isSelected) ? `<span class="badge ${badgeClass}"><i class="${iconClass}"></i></span>` : ''}
-                            </li>`;
-                    });
-                    
-                    questionHtml += `
-                                        </ul>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <h6 class="text-white">Student's Answer:</h6>
-                                        <p class="text-white">${item.student_answer}</p>
-                                        <h6 class="text-white">Correct Answer:</h6>
-                                        <p class="text-white">${item.correct_answer}</p>
-                                        <h6 class="text-white">Result:</h6>
-                                        <span class="badge ${item.is_correct ? 'bg-success' : 'bg-danger'}">
-                                            ${item.is_correct ? 'Correct' : 'Incorrect'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                        
-                    $('#questions-container').append(questionHtml);
-                });
-                
-                // Show the modal
-                $('#viewSubmissionModal').modal('show');
             });
 
             // Handle edit button click

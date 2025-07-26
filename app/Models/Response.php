@@ -12,7 +12,7 @@ class Response extends Model
     protected $fillable = ['quiz_id', 'student_id', 'answers'];
 
     protected $casts = [
-        'answers' => 'array',
+        'answers' => 'array', // This will cast the JSON column to an array
     ];
 
     public function quiz()
