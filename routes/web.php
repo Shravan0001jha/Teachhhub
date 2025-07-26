@@ -90,6 +90,7 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
         Route::delete('quiz/{quiz}', [QuizController::class, 'destroy'])->name('quiz.destroy');
         Route::post('quiz/{quiz}/activate', [QuizController::class, 'activate'])->name('quiz.activate');
         Route::post('quiz/{quiz}/deactivate', [QuizController::class, 'deactivate'])->name('quiz.deactivate');
+        Route::get('quiz/{quiz}/submission/{student}', [QuizController::class, 'viewSubmission'])->name('quiz.viewSubmission');
     });
 });
 

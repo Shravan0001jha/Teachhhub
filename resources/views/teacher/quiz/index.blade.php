@@ -50,6 +50,86 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Quiz Submissions Section -->
+        <div class="mt-5">
+            <h2>Quiz Submissions</h2>
+            <div class="table-responsive">
+                <table id="submissions-table" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Quiz Name</th>
+                            <th>Student Name</th>
+                            <th>Score</th>
+                            <th>Date Submitted</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       
+                        <!-- $quizResults = QuizResult::where('teacher_id', auth()->user()->id)
+                            ->with(['quiz', 'student'])
+                            ->orderBy('date', 'desc')
+                            ->get(); -->
+                        
+                        <!-- Loop would be: -->
+                         @foreach($quizResults as $result)
+                            <tr>
+                                <td>{{ $result->quiz->title }}</td>
+                                <td>{{ $result->student->name }}</td>
+                                <td>{{ $result->marks }}/{{ $result->total_marks }}</td>
+                                <td>{{ $result->date }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-info view-submission-btn" 
+                                            data-quiz-id="{{ $result->quiz_id }}"
+                                            data-student-id="{{ $result->student_id }}"
+                                            data-quiz-title="{{ $result->quiz->title }}" 
+                                            data-student-name="{{ $result->student->name }}"
+                                            data-score="{{ $result->marks }}/{{ $result->total_marks }}">
+                                        View Test
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach 
+                       
+                        
+                       
+                        <tr>
+                            <td>Mathematics Quiz 1</td>
+                            <td>John Doe</td>
+                            <td>8/10</td>
+                            <td>2024-07-25 14:30:00</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-info view-submission-btn" 
+                                        data-quiz-title="Mathematics Quiz 1" 
+                                        data-student-name="John Doe"
+                                        data-score="8/10"
+                                        data-submission='[
+                                            {
+                                                "question": "What is 2 + 2?",
+                                                "options": ["2", "3", "4", "5"],
+                                                "student_answer": "4",
+                                                "correct_answer": "4",
+                                                "is_correct": true
+                                            },
+                                            {
+                                                "question": "What is 5 × 6?",
+                                                "options": ["25", "30", "35", "40"],
+                                                "student_answer": "35",
+                                                "correct_answer": "30",
+                                                "is_correct": false
+                                            }
+                                        ]'>
+                                    View Test
+                                </button>
+                            </td>
+                        </tr>
+                        
+                    
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Create Quiz Modal -->
@@ -109,6 +189,32 @@
         </div>
     </div>
 </div>
+
+    <!-- View Quiz Submission Modal -->
+    <div class="modal fade" id="viewSubmissionModal" tabindex="-1" aria-labelledby="viewSubmissionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-white" id="viewSubmissionModalLabel">Quiz Submission Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6 class="text-white">Quiz: <span id="modal-quiz-title"></span></h6>
+                        <h6 class="text-white">Student: <span id="modal-student-name"></span></h6>
+                        <h6 class="text-white">Score: <span id="modal-score"></span></h6>
+                    </div>
+                    <div id="questions-container">
+                        <!-- Questions will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @include('teacher.quiz.edit')
 @endsection
 
@@ -131,6 +237,10 @@
     <script>
         $(document).ready(function() {
             const table = $('#quizzes-table').DataTable({
+                // DataTable options can be added here
+            });
+            
+            const submissionsTable = $('#submissions-table').DataTable({
                 // DataTable options can be added here
             });
 
@@ -184,6 +294,95 @@
                     error: function(response) {
                         console.error('An error occurred while saving the quiz:', response);
                         alert('An error occurred while saving the quiz.');
+                    }
+                });
+            });
+
+            // Handle view submission button click
+            $(document).on('click', '.view-submission-btn', function() {
+                var quizTitle = $(this).data('quiz-title');
+                var studentName = $(this).data('student-name');
+                var score = $(this).data('score');
+                var quizId = $(this).data('quiz-id');
+                var studentId = $(this).data('student-id');
+
+                // Show the modal immediately with a loading spinner
+                $('#modal-quiz-title').text(quizTitle);
+                $('#modal-student-name').text(studentName);
+                $('#modal-score').text(score);
+                $('#questions-container').html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-3">Loading submission details...</p></div>');
+                $('#viewSubmissionModal').modal('show');
+
+                // Fetch submission data via AJAX
+                $.ajax({
+                    url: '/teacher/quiz/' + quizId + '/submission/' + studentId,
+                    method: 'GET',
+                    success: function(response) {
+                        var submissionData = response.submission_details;
+
+                        // Clear the loading spinner and populate questions
+                        $('#questions-container').empty();
+                        submissionData.forEach(function(item, index) {
+                            var questionHtml = `
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <h6 class="mb-0 text-black">Question ${index + 1}: ${item.question}</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6 class="text-black">Options:</h6>
+                                                <ul class="list-group list-group-flush">`;
+
+                            item.options.forEach(function(option) {
+                                var isCorrect = option === item.correct_answer;
+                                var isSelected = option === item.student_answer;
+                                var badgeClass = '';
+                                var iconClass = '';
+
+                                if (isCorrect && isSelected) {
+                                    badgeClass = 'bg-success';
+                                    iconClass = 'fa fa-check';
+                                } else if (isCorrect) {
+                                    badgeClass = 'bg-success';
+                                    iconClass = 'fa fa-check';
+                                } else if (isSelected) {
+                                    badgeClass = 'bg-danger';
+                                    iconClass = 'fa fa-times';
+                                } else {
+                                    badgeClass = 'bg-light text-dark';
+                                }
+
+                                questionHtml += `
+                                    <li class="list-group-item d-flex justify-content-between align-items-center ${isSelected ? 'border-primary' : ''}">
+                                        ${option}
+                                        ${(isCorrect || isSelected) ? `<span class="badge ${badgeClass}"><i class="${iconClass}"></i></span>` : ''}
+                                    </li>`;
+                            });
+
+                            questionHtml += `
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="text-white">Student's Answer:</h6>
+                                                <p class="text-white">${item.student_answer}</p>
+                                                <h6 class="text-white">Correct Answer:</h6>
+                                                <p class="text-white">${item.correct_answer}</p>
+                                                <h6 class="text-white">Result:</h6>
+                                                <span class="badge ${item.is_correct ? 'bg-success' : 'bg-danger'}">
+                                                    ${item.is_correct ? 'Correct' : 'Incorrect'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`;
+
+                            $('#questions-container').append(questionHtml);
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading submission details:', error, xhr.responseText);
+                        $('#questions-container').html('<p class="text-danger">Failed to load submission details. Please try again later.</p>');
                     }
                 });
             });

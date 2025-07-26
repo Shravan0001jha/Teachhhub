@@ -17,7 +17,11 @@ class QuizController extends Controller
     {
         $quizzes = Quiz::where('teacher_id', auth()->guard('teacher')->user()->id)->get();
         $batches = Batch::all();
-        return view('teacher.quiz.index', compact('quizzes', 'batches'));
+        $quizResults = QuizResult::where('teacher_id', auth()->guard('teacher')->user()->id)
+                            ->with(['quiz', 'student'])
+                            ->orderBy('updated_at', 'desc')
+                            ->get(); 
+        return view('teacher.quiz.index', compact('quizzes', 'batches', 'quizResults'));
     }
 
     // Method to show the form to create a new quiz
@@ -270,13 +274,24 @@ class QuizController extends Controller
         $answers = $request->input('answers');
         $totalMarks = 0;
         $obtainedMarks = 0;
+        $answersArray = [];
 
         foreach ($quiz->questions as $question) {
             $totalMarks++;
             if (isset($answers[$question->id])) {
                 $selectedOption = $answers[$question->id];
                 $correctOption = $question->options->where('is_correct', true)->first();
-                if ($correctOption && $correctOption->id == $selectedOption) {
+                $isCorrect = $correctOption && $correctOption->id == $selectedOption;
+
+                // Add details to the answers array
+                $answersArray[] = [
+                    'question_id' => $question->id,
+                    'options' => $question->options->pluck('option_text')->toArray(),
+                    'selected_option' => $question->options->where('id', $selectedOption)->first()->option_text ?? null,
+                    'correct_option' => $correctOption->option_text ?? null,
+                ];
+
+                if ($isCorrect) {
                     $obtainedMarks++;
                 }
             }
@@ -292,6 +307,13 @@ class QuizController extends Controller
             'date' => now(),
         ]);
 
+        // Store the answers in the response table
+        Response::create([
+            'quiz_id' => $quiz->id,
+            'student_id' => auth()->guard('student')->user()->id,
+            'answers' => $answersArray,
+        ]);
+
         print_r("Quiz submitted\n");
 
         return redirect()->route('quiz.index')->with('success', 'Quiz submitted successfully!');
@@ -305,6 +327,40 @@ class QuizController extends Controller
             ->get();
 
         return view('student.quiz.results', compact('quiz', 'responses'));
+    }
+
+    // Method for teachers to view a student's quiz submission
+    public function viewSubmission($quizId, $studentId)
+    {
+        $quiz = Quiz::with(['questions.options'])->findOrFail($quizId);
+        $student = Student::findOrFail($studentId);
+
+        $responses = Response::where('quiz_id', $quizId)
+            ->where('student_id', $studentId)
+            ->get();
+        \Log::info('Viewing student submission', [
+            'quiz_id' => $quizId,
+            'student_id' => $studentId,
+            'responses' => $responses,
+        ]);
+        $submissionDetails = $quiz->questions->map(function ($question) use ($responses) {
+            $response = $responses->first(); // Assuming one response per quiz per student
+            $answer = collect($response->answers)->firstWhere('question_id', $question->id);
+
+            return [
+                'question' => $question->question_text,
+                'options' => $question->options->pluck('option_text'),
+                'student_answer' => $answer['selected_option'] ?? null,
+                'correct_answer' => $answer['correct_option'] ?? null,
+                'is_correct' => isset($answer['selected_option'], $answer['correct_option']) && $answer['selected_option'] === $answer['correct_option'],
+            ];
+        });
+        \Log::info('Viewing submission details', [
+            'quiz_id' => $quizId,
+            'student_id' => $studentId,
+            'submission_details' => $submissionDetails,
+        ]);
+        return response()->json(['submission_details' => $submissionDetails]);
     }
 }
 
