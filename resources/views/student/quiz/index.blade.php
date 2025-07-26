@@ -76,6 +76,20 @@
         </div>
     </div>
 </div>
+
+<!-- Submission Modal (Hidden by default) -->
+<div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Submitting...</span>
+                </div>
+                <p class="mt-3">Submitting your quiz, please wait...</p>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('styles')
@@ -86,6 +100,30 @@
     <style>
         .text-white {
             color: white !important;
+        }
+        .loader {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            color: white;
+            font-size: 1.5rem;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9998;
+        }
+        .modal-loader {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin: 20px 0;
         }
     </style>
     <!-- END PAGE LEVEL PLUGINS/CUSTOM STYLES -->
@@ -107,10 +145,15 @@
             // Handle take quiz button click
             $(document).on('click', '.take-quiz-btn', function() {
                 var quizId = $(this).data('id');
+                // Show loading bar inside the modal when fetching quiz data
+                var modalLoader = $('<div class="modal-loader">Loading...</div>');
+                $('#questionsContainer').html(modalLoader);
+
                 $.ajax({
                     url: '/student/quiz/' + quizId,
                     method: 'GET',
                     success: function(response) {
+                        modalLoader.remove(); // Remove loader on success
                         var quiz = response.quiz;
                         $('#quizId').val(quiz.id);
                         $('#takeQuizModalLabel').text('Take Quiz: ' + quiz.title);
@@ -138,6 +181,7 @@
                         $('#takeQuizModal').modal('show');
                     },
                     error: function(response) {
+                        modalLoader.remove(); // Remove loader on error
                         console.error('An error occurred while fetching the quiz data:', response);
                         alert('An error occurred while fetching the quiz data.');
                     }
@@ -149,22 +193,41 @@
                 event.preventDefault();
                 var quizId = $('#quizId').val();
                 var url = '/student/quiz/' + quizId + '/submit';
+
+                // Disable the submit button to prevent multiple submissions
+                $(this).find('button[type="submit"]').prop('disabled', true);
+
+                // Show full-screen overlay to prevent multiple submissions
+                var overlay = $('<div class="overlay"></div>');
+                $('body').append(overlay);
+
+                // Show loading modal upon quiz submission
+                var submissionModal = `
+                    <div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-body text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Submitting...</span>
+                                    </div>
+                                    <p class="mt-3">Submitting your quiz, please wait...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                $('body').append(submissionModal);
+                $('#submissionModal').modal('show');
+
                 $.ajax({
                     url: url,
                     method: 'POST',
                     data: $(this).serialize(),
                     success: function(response) {
-                        if (response.success) {
-                            console.log('Quiz submitted successfully:', response);
-                            location.reload(); // Refresh the page completely
-                        } else {
-                            console.error('An error occurred while submitting the quiz:', response);
-                            alert('An error occurred while submitting the quiz.');
-                        }
+                        location.reload(); // Refresh the page completely
                     },
                     error: function(response) {
-                        console.error('An error occurred while submitting the quiz:', response);
-                        // alert('An error occurred while submitting the quiz.');
+                        $('#submissionModal').modal('hide'); // Hide modal on error
+                        location.reload(); // Reload the page on error
                     }
                 });
             });
