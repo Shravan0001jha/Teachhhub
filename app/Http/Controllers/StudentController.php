@@ -18,8 +18,9 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
-        //
+        print_r($request->all());
         if ($request->ajax()) {
+           print_r($request->all());
             $data = Student::select('*');
             return DataTables::of($data)
                 ->addColumn('action', function ($data) {

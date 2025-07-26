@@ -15,6 +15,7 @@ class QuizResult extends Model
         'marks',
         'total_marks',
         'date',
+        'status',
     ];
 
     public function quiz()

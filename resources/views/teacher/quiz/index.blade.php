@@ -31,6 +31,19 @@
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                                 </form>
+                                @if($quiz->status === 'ACTIVE')
+                                <form action="{{ route('teacher.quiz.deactivate', $quiz->id) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('POST')
+                                    <button type="submit" class="btn btn-sm btn-warning">Deactivate</button>
+                                </form>
+                                @else
+                                <form action="{{ route('teacher.quiz.activate', $quiz->id) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('POST')
+                                    <button type="submit" class="btn btn-sm btn-success">Activate</button>
+                                </form>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

@@ -49,7 +49,8 @@ class QuizController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'batch_id' => $request->batch_id,
-            'teacher_id' =>auth()->guard('teacher')->user()->id,
+            'teacher_id' => auth()->guard('teacher')->user()->id,
+            'status' => 'INACTIVE', // Default status set to INACTIVE
         ]);
 
         print_r("Quiz created: " . $quiz->id . "\n");
@@ -107,6 +108,11 @@ class QuizController extends Controller
     // Method to update a quiz
     public function update(Request $request, Quiz $quiz)
     {
+        \Log::info('Update request received', [
+            'quiz_id' => $quiz->id,
+            'request_data' => $request->all(),
+            'teacher_id' => auth()->guard('teacher')->user()->id,
+        ]);
         print_r("Update method called\n");
         $request->validate([
             'title' => 'required|string|max:255',
@@ -124,7 +130,12 @@ class QuizController extends Controller
         $quiz->update([
             'title' => $request->title,
             'batch_id' => $request->batch_id,
-            'description' => $request->description,
+            'description' => $request->description
+        ]);
+        \Log::info('Update request received', [
+            'quiz_id' => $quiz->id,
+            'request_data' => $request->all(),
+            'teacher_id' => auth()->guard('teacher')->user()->id,
         ]);
 
         print_r("Quiz updated: " . $quiz->id . "\n");
@@ -155,7 +166,25 @@ class QuizController extends Controller
         return redirect()->route('quiz.index')->with('success', 'Quiz updated successfully!');
     }
 
-    
+    // Method for teachers to activate a quiz
+    public function activate(Quiz $quiz)
+    {
+        $quiz->update(['status' => 'ACTIVE']);
+        return redirect()->route('teacher.quiz.index')->with('success', 'Quiz activated successfully!');
+    }
+
+    // Method for teachers to deactivate a quiz
+    public function deactivate(Quiz $quiz)
+    {
+        \Log::info('Quiz deactivated', [
+            'quiz_id' => $quiz->id,
+            'teacher_id' => auth()->guard('teacher')->user()->id,
+        ]);
+        // $id = $quiz->id;
+        // $quiz = Quiz::findOrFail($id);
+        $quiz->update(['status' => 'INACTIVE']);;
+        return redirect()->route('teacher.quiz.index')->with('success', 'Quiz deactivated successfully!');
+    }
 
     // Method to delete a quiz
     public function destroy(Quiz $quiz)
@@ -170,14 +199,36 @@ class QuizController extends Controller
     // Method for students to view available quizzes
     public function studentIndex()
     {
-        
         $studentId = auth()->guard('student')->user()->id;
         $student = Student::findOrFail($studentId);
-        $batchId = $student->batch_id;
-        $quizzes = Quiz::where('batch_id', $batchId)->get();
+
+        // Get the batch IDs for the student
+        $batchIds = $student->batches()->pluck('batch_id')->toArray();
+
+        // Fetch quizzes that do not have an entry in the quiz_results table for this student and have status ACTIVE
+        $quizzes = Quiz::whereIn('batch_id', $batchIds)
+            ->where('status', 'ACTIVE')
+            ->whereNotExists(function ($query) use ($studentId) {
+                $query->select('quiz_id')
+                    ->from('quiz_results')
+                    ->whereColumn('quiz_results.quiz_id', 'quizzes.id')
+                    ->where('quiz_results.student_id', $studentId);
+            })
+            ->get();
+
+        // Fetch quiz results for the student with status ACTIVE
         $quizResults = QuizResult::where('student_id', $studentId)
+            ->where('status', 'ACTIVE')
             ->orderBy('date', 'desc')
             ->get();
+
+        \Log::info('Student viewing available quizzes', [
+            'student_id' => $studentId,
+            'batch_ids' => $batchIds,
+            'quizzes_count' => $quizzes->count(),
+            'quiz_results_count' => $quizResults->count(),
+        ]);
+
         return view('student.quiz.index', compact('quizzes', 'studentId', 'quizResults'));
     }
 

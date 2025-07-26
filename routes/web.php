@@ -88,6 +88,8 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
         Route::get('quiz/{id}/edit', [QuizController::class, 'edit'])->name('quiz.edit');
         Route::put('quiz/{quiz}', [QuizController::class, 'update'])->name('quiz.update');
         Route::delete('quiz/{quiz}', [QuizController::class, 'destroy'])->name('quiz.destroy');
+        Route::post('quiz/{quiz}/activate', [QuizController::class, 'activate'])->name('quiz.activate');
+        Route::post('quiz/{quiz}/deactivate', [QuizController::class, 'deactivate'])->name('quiz.deactivate');
     });
 });
 

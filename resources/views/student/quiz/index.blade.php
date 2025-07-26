@@ -28,7 +28,7 @@
         </table>
     </div>
 
-    <h2 class="text-white mt-5">Latest Quiz Results</h2>
+    <h2 class="text-black mt-5">Latest Quiz Results</h2>
     <div class="table-responsive">
         <table id="quiz-results-table" class="table table-striped table-bordered">
             <thead>
@@ -156,10 +156,10 @@
                     success: function(response) {
                         if (response.success) {
                             console.log('Quiz submitted successfully:', response);
-                            //location.reload(); // Refresh the page
+                            location.reload(); // Refresh the page completely
                         } else {
                             console.error('An error occurred while submitting the quiz:', response);
-                            alert('An error occurred while submitting the quiz123');
+                            alert('An error occurred while submitting the quiz.');
                         }
                     },
                     error: function(response) {
