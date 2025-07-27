@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Personal - Start Bootstrap Theme</title>
+        <title>Educational Avenue</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="{{asset('front_assets/favicon.ico')}}" />
         <!-- Custom Google font-->
@@ -16,14 +16,93 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="{{ asset('front_assets/css/styles.css') }}" rel="stylesheet" type="text/css" />
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f8f9fa;
+                margin: 0;
+                padding: 0;
+            }
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px;
+                background-color: #ffffff;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .header .logo {
+                font-size: 24px;
+                font-weight: bold;
+                color: #007bff;
+            }
+            .header .login-buttons a {
+                margin-left: 15px;
+                text-decoration: none;
+                color: #007bff;
+                font-weight: bold;
+            }
+            .hero {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 50px;
+                background: linear-gradient(to right, #6a11cb, #2575fc);
+                color: white;
+            }
+            .hero .content {
+                max-width: 50%;
+            }
+            .hero .content h1 {
+                font-size: 2.5rem;
+                font-weight: bold;
+            }
+            .hero .content p {
+                font-size: 1.2rem;
+                margin: 20px 0;
+            }
+            .hero .content .buttons a {
+                margin-right: 15px;
+                padding: 10px 20px;
+                border-radius: 5px;
+                text-decoration: none;
+                font-weight: bold;
+            }
+            .hero .content .buttons .explore {
+                background-color: #007bff;
+                color: white;
+            }
+            .hero .content .buttons .demo {
+                background-color: white;
+                color: #007bff;
+                border: 1px solid #007bff;
+            }
+            .hero .image {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+            }
+            .hero .image img {
+                max-width: 80%;
+                height: auto;
+            }
+        </style>
 
     </head>
     <body class="d-flex flex-column h-100">
+        <!-- <div class="header">
+            <div class="logo">Educational Avenue</div>
+            <div class="login-buttons">
+                <a href="{{ route('student.login') }}">Student Login</a>
+                <a href="{{ route('teacher.login') }}">Teacher Login</a>
+            </div>
+        </div> -->
         <main class="flex-shrink-0">
             <!-- Navigation-->
             <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
                 <div class="container px-5">
-                    <a class="navbar-brand" href="#"><span class="fw-bolder text-primary">Start Bootstrap</span></a>
+                    <a class="navbar-brand" href="#"><span class="fw-bolder text-primary">Educational Avenue</span></a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 small fw-bolder">
@@ -40,23 +119,26 @@
                         <div class="col-xxl-5">
                             <!-- Header text content-->
                             <div class="text-center text-xxl-start">
-                                <div class="badge bg-gradient-primary-to-secondary text-white mb-4"><div class="text-uppercase">Design &middot; Development &middot; Marketing</div></div>
-                                <div class="fs-3 fw-light text-muted">I can help your business to</div>
-                                <h1 class="display-3 fw-bolder mb-5"><span class="text-gradient d-inline">Get online and grow fast</span></h1>
+                                <div class="badge bg-gradient-primary-to-secondary text-white mb-4"><div class="text-uppercase">Live Classes &middot; Online Test &middot; Doubt Support</div></div>
+                                <div class="fs-3 fw-light text-muted">Empowering learners to achieve more with </div>
+                                <h1 class="display-3 fw-bolder mb-5"><span class="text-gradient d-inline">Expert Tutors and Quality contents</span></h1>
                                 <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-xxl-start mb-3">
-                                    <a class="btn btn-primary btn-lg px-5 py-3 me-sm-3 fs-6 fw-bolder" href="#">Resume</a>
-                                    <a class="btn btn-outline-dark btn-lg px-5 py-3 fs-6 fw-bolder" href="#">Projects</a>
+                                    <a class="btn btn-primary btn-lg px-5 py-3 me-sm-3 fs-6 fw-bolder" href="#">Explore Courses</a>
+                                    <a class="btn btn-outline-dark btn-lg px-5 py-3 fs-6 fw-bolder" href="#">Book a free demo</a>
                                 </div>
                             </div>
                         </div>
                         <div class="col-xxl-7">
                             <!-- Header profile picture-->
                             <div class="d-flex justify-content-center mt-5 mt-xxl-0">
-                                <div class="profile bg-gradient-primary-to-secondary">
+                                <div class="profile bg-gradient-primary-to-secondary d-flex justify-content-center align-items-center position-relative" style="height: 300px;">
+
                                     <!-- TIP: For best results, use a photo with a transparent background like the demo example below-->
                                     <!-- Watch a tutorial on how to do this on YouTube (link)-->
-                                    <img class="profile-img" src="{{asset('front_assets/profile.png')}}" alt="..." />
-                                    <div class="dots-1">
+                                    <img class="profile-img" src="{{ asset('Educational-Avenue-17-1-600x244.jpg') }}" alt="Educational Avenue Logo" style="height: 200px; width: 300px; object-fit: contain;" />
+                                    <!-- <img class="profile-img" src="{{asset('Educational-Avenue-17-1-600x244.jpg')}}" alt="..." /> -->
+                                    <div class="dots-1 position-absolute top-0 start-0">
+     
                                         <!-- SVG Dots-->
                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 191.6 1215.4" style="enable-background: new 0 0 191.6 1215.4" xml:space="preserve">
                                             <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)">
@@ -84,7 +166,7 @@
                                         </svg>
                                         <!-- END of SVG dots-->
                                     </div>
-                                    <div class="dots-2">
+                                    <div class="dots-2 position-absolute top-0 end-0">
                                         <!-- SVG Dots-->
                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 191.6 1215.4" style="enable-background: new 0 0 191.6 1215.4" xml:space="preserve">
                                             <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)">
@@ -112,7 +194,7 @@
                                         </svg>
                                         <!-- END of SVG dots-->
                                     </div>
-                                    <div class="dots-3">
+                                    <div class="dots-3 position-absolute bottom-0 start-0">
                                         <!-- SVG Dots-->
                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 191.6 1215.4" style="enable-background: new 0 0 191.6 1215.4" xml:space="preserve">
                                             <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)">
@@ -140,7 +222,7 @@
                                         </svg>
                                         <!-- END of SVG dots-->
                                     </div>
-                                    <div class="dots-4">
+                                    <div class="dots-4 position-absolute bottom-0 end-0">
                                         <!-- SVG Dots-->
                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 191.6 1215.4" style="enable-background: new 0 0 191.6 1215.4" xml:space="preserve">
                                             <g transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)">
@@ -180,9 +262,9 @@
                     <div class="row gx-5 justify-content-center">
                         <div class="col-xxl-8">
                             <div class="text-center my-5">
-                                <h2 class="display-5 fw-bolder"><span class="text-gradient d-inline">About Me</span></h2>
-                                <p class="lead fw-light mb-4">My name is Start Bootstrap and I help brands grow.</p>
-                                <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Fugit dolorum itaque qui unde quisquam consequatur autem. Eveniet quasi nobis aliquid cumque officiis sed rem iure ipsa! Praesentium ratione atque dolorem?</p>
+                                <h2 class="display-5 fw-bolder"><span class="text-gradient d-inline">About Us</span></h2>
+                                <p class="lead fw-light mb-4">First Step Towards Your Success....</p>
+                                <p class="text-muted">Our vision is to empower students to acquire, demonstrate, articulate and value knowledge and skills that will support them, as life-long learners, to participate in and contribute to the global world and practise the core values of the life.​</p>
                                 <div class="d-flex justify-content-center fs-2 gap-4">
                                     <a class="text-gradient" href="#!"><i class="bi bi-twitter"></i></a>
                                     <a class="text-gradient" href="#!"><i class="bi bi-linkedin"></i></a>
