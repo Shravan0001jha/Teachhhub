@@ -63,6 +63,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('teacher',TeacherController::class);
         Route::resource('student',StudentController::class);
         Route::resource('batch',BatchController::class);
+        Route::get('students', [StudentController::class, 'index'])->name('students.index');
 
         // Add other routes that require admin authentication here
     });

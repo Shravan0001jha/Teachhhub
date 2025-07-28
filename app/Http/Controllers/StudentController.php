@@ -18,9 +18,9 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
-        print_r($request->all());
+        // print_r($request->all());
         if ($request->ajax()) {
-           print_r($request->all());
+        //    print_r($request->all());
             $data = Student::select('*');
             return DataTables::of($data)
                 ->addColumn('action', function ($data) {
@@ -99,7 +99,8 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        //
+        $students = Student::all();
+        return view('admin.student.show', compact('students'));
     }
 
     /**

@@ -33,13 +33,13 @@ class AdminController extends Controller
 
     public function showRegisterForm()
     {
-        abort(404);
+        // abort(404);
         return view('auth.admin.register');
     }
 
     public function register(Request $request)
     {
-        abort(404);
+        // abort(404);
         $this->validator($request->all())->validate();
 
         $Admin = $this->create($request->all());
@@ -62,11 +62,14 @@ class AdminController extends Controller
 
     protected function create(array $data)
     {
-        abort(404);
+        // abort(404);
         return Admin::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'created_at' => now(),
+            'created_by' => 1, // Assuming 1 is the ID of the superadmin or creator
+            'updated_at' => now()
         ]);
     }
 
