@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    nodejs \
+    npm \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Install Composer
@@ -22,9 +24,10 @@ COPY . .
 
 # Install application dependencies
 RUN composer install --no-dev --optimize-autoloader
+RUN npm install
 
-# Expose port 8080
-EXPOSE 8080
+# Expose ports for Laravel and Vite
+EXPOSE 8000 5173
 
-# Start PHP-FPM
-CMD ["php-fpm"]
+# Start both Laravel and Vite development servers
+CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=8000 & npm run dev"]
