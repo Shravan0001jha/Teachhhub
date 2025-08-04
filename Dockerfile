@@ -1,5 +1,5 @@
 # Use the official PHP image
-FROM php:8.1-fpm
+FROM php:8.2-fpm
 
 # Set working directory
 WORKDIR /var/www/html
@@ -17,13 +17,19 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Copy application files
 COPY . .
 
 # Install application dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer clear-cache && \
+    composer install --no-dev --optimize-autoloader --verbose
+
+# Verify PHP extensions and platform requirements
+RUN composer check-platform-reqs
+
+# Install npm dependencies
 RUN npm install
 
 # Expose ports for Laravel and Vite
