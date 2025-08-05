@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     nodejs \
     npm \
+    supervisor \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Install Composer
@@ -32,8 +33,11 @@ RUN composer check-platform-reqs
 # Install npm dependencies
 RUN npm install
 
-# Expose ports for Laravel and Vite
-EXPOSE 8000 5173
+# Copy supervisord configuration
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Start both Laravel and Vite development servers
-CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=8000 & npm run dev"]
+# Expose ports for Laravel and Vite
+EXPOSE 8080 5173
+
+# Start supervisord
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
